@@ -1,11 +1,10 @@
-
 import streamlit as st
 import sqlite3
 import pandas as pd
 from datetime import date
 import re
 
-# Connexion SQLite
+
 @st.cache_resource
 def get_connection():
     return sqlite3.connect("hotel_reservation.db", check_same_thread=False)
@@ -13,7 +12,7 @@ def get_connection():
 conn = get_connection()
 cursor = conn.cursor()
 
-# CSS personnalisé avec effets hover 
+# CSS 
 st.markdown("""
 <style>
     /* Styles globaux */
@@ -104,8 +103,7 @@ st.markdown("""
 # En-tête avec logo animé
 st.markdown("""
 <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
-    <h1 style="text-align:center; color: #154360; transition: all 0.3s ease;">🏨 Gestion de la Chaîne Hôtelière</h1>
-    
+    <h1 style="text-align:center; color: #154360; transition: all 0.3s ease;"> 🏨Gestion de la Chaîne Hôtelière</h1>
 </div>
 """, unsafe_allow_html=True)
 
@@ -250,16 +248,16 @@ with tabs[4]:
         
         # Sélection de la chambre avec vérification de disponibilité
         chambres = pd.read_sql("""
-    SELECT c.id_chambre, c.numero, t.nom_type
-FROM Chambre c
-JOIN Type_Chambre t ON c.id_type = t.id_type
-
+    SELECT c.id_chambre, c.numero, t.nom_type 
+    FROM Chambre c
+    JOIN TypeChambre t ON c.id_type = t.id_type
+    ORDER BY c.numero
 """, conn)
 
         chambre_selection = st.selectbox(
             "Chambre*",
             options=chambres['numero'],
-           format_func=lambda x: f"Chambre {x} ({chambres[chambres['numero'] == x]['nom_type'].values[0]})"
+            format_func=lambda x: f"Chambre {x} ({chambres[chambres['numero'] == x]['nom_type'].values[0]})"
 
         )
         chambre_id = chambres[chambres['numero'] == chambre_selection]['id_chambre'].values[0]
@@ -299,8 +297,7 @@ JOIN Type_Chambre t ON c.id_type = t.id_type
 
 # Pied de page avec effet hover
 st.markdown("""
-<div style="text-align: center; margin-top: 40px; padding: 15px; background-color: #f8f9fa; border-radius: 10px; transition: all 0.3s ease;">
-    <p style="color: #6c757d; transition: all 0.3s ease;">© 2025 Gestion Hôtelière - Tous droits réservés par OUHAMMOU YOUSSEF & AYOUB LAKHLIL </p>
+<div style="text-align: center; margin-top: 30px; padding: 15px; background-color: #838e96; border-radius: 8px; transition: all 0.3s ease;">
+    <p style="color: #4d5154; transition: all 0.3s ease;">© 2025 Gestion Hôtelière - Tous droits réservés par OUHAMMOU YOUSSEF & AYOUB LAKHLIL</p>
 </div>
 """, unsafe_allow_html=True)
-
