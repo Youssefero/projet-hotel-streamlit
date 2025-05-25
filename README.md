@@ -30,10 +30,7 @@ Ce projet a pour objectif de créer une application web de gestion d'une chaîne
 
 
 - 🗃️ Dépôt GitHub : [https://github.com/Youssefero/projet-hotel-streamlit](https://github.com/Youssefero/projet-hotel-streamlit)
-## 🎬 Vidéo de démonstration
-
-📺 Regardez la démo ici :  
-[📹 Voir la vidéo sur Google Drive]([https://drive.google.com/file/d/TON_ID_VIDEO/view?usp=sharing](https://drive.google.com/file/d/1HC7L9VhQj-J9aWWrxP-CcnY_2APwNz-Z/view?usp=drive_link))
+- 🎥 Vidéo de démonstration : [https://drive.google.com/file/d/TON-LIEN](https://drive.google.com/file/d/1HC7L9VhQj-J9aWWrxP-CcnY_2APwNz-Z/view?usp=drive_link).
 
 ## 📂 Structure du projet
 
