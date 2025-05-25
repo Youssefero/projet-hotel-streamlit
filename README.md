@@ -24,6 +24,13 @@ Ce projet a pour objectif de créer une application web de gestion d'une chaîne
 - [Pandas](https://pandas.pydata.org/)
 
 ---
+ ---
+
+## 🔗 Liens du projet
+
+- 💻 Application Streamlit (en ligne) : [https://projet-hotel.streamlit.app](https://projet-hotel.streamlit.app) *(remplace par ton vrai lien Streamlit)*
+- 🗃️ Dépôt GitHub : [https://github.com/Youssefero/projet-hotel-streamlit](https://github.com/Youssefero/projet-hotel-streamlit)
+- 🎥 Vidéo de démonstration : [https://drive.google.com/file/d/TON-LIEN](https://drive.google.com/file/d/TON-LIEN)
 
 ## 📂 Structure du projet
 
