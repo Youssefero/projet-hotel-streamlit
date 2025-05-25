@@ -15,14 +15,15 @@ DROP TABLE IF EXISTS Hotel;
 """)
 
 # Création des tables
-cursor.execute("""CREATE TABLE Hotel (
+cursor.execute("""CREATE TABLE IF NOT EXISTS Hotel (
+
     id_hotel INTEGER PRIMARY KEY,
     ville TEXT,
     pays TEXT,
     code_postal INTEGER
 )""")
 
-cursor.execute("""CREATE TABLE Client (
+cursor.execute("""CREATE TABLE IF NOT EXISTS Client (
     id_client INTEGER PRIMARY KEY,
     adresse TEXT,
     ville TEXT,
@@ -32,19 +33,19 @@ cursor.execute("""CREATE TABLE Client (
     nom_complet TEXT
 )""")
 
-cursor.execute("""CREATE TABLE Prestation (
+cursor.execute("""CREATE TABLE IF NOT EXISTS Prestation (
     id_prestation INTEGER PRIMARY KEY,
     prix REAL,
     description TEXT
 )""")
 
-cursor.execute("""CREATE TABLE TypeChambre (
+cursor.execute("""CREATE TABLE IF NOT EXISTS TypeChambre (
     id_type INTEGER PRIMARY KEY,
     nom_type TEXT,
     prix REAL
 )""")
 
-cursor.execute("""CREATE TABLE Chambre (
+cursor.execute("""CREATE TABLE IF NOT EXISTS Chambre (
     id_chambre INTEGER PRIMARY KEY,
     numero INTEGER,
     etage INTEGER,
@@ -55,7 +56,7 @@ cursor.execute("""CREATE TABLE Chambre (
     FOREIGN KEY (id_hotel) REFERENCES Hotel(id_hotel)
 )""")
 
-cursor.execute("""CREATE TABLE Reservation (
+cursor.execute("""CREATE TABLE IF NOT EXISTS Reservation (
     id_reservation INTEGER PRIMARY KEY,
     date_arrivee TEXT,
     date_depart TEXT,
@@ -65,7 +66,7 @@ cursor.execute("""CREATE TABLE Reservation (
     FOREIGN KEY (id_chambre) REFERENCES Chambre(id_chambre)
 )""")
 
-cursor.execute("""CREATE TABLE Evaluation (
+cursor.execute("""CREATE TABLE IF NOT EXISTS Evaluation (
     id_evaluation INTEGER PRIMARY KEY,
     date TEXT,
     note INTEGER,
