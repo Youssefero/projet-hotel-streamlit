@@ -1,7 +1,8 @@
+
 import streamlit as st
 import sqlite3
 import pandas as pd
-from datetime import date
+from datetime import date, timedelta
 import re
 
 
@@ -12,102 +13,42 @@ def get_connection():
 conn = get_connection()
 cursor = conn.cursor()
 
-# CSS 
+# CSS personnalisé avec effets hover
 st.markdown("""
 <style>
-    /* Styles globaux */
     .reportview-container .main .block-container {
         padding-top: 2rem;
         padding-bottom: 2rem;
     }
-    
-    /* Boutons - Effet 3D au survol */
     .stButton>button {
-    transition: all 0.3s ease-in-out;
-    background-color:#50606b;
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius: 6px;
-    padding: 0.6em 1.2em;
-}
-
-.stButton>button:hover {
-    background-color: #5dade2 !important;
-    color: white !important;
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-    .stButton>button:active {
-        transform: translateY(1px);
+        transition: all 0.3s ease-in-out;
+        background-color: #50606b;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 6px;
+        padding: 0.6em 1.2em;
     }
-    
-    /* DataFrames - Effet ligne surlignée */
-    .dataframe tbody tr {
-        transition: all 0.2s ease;
+    .stButton>button:hover {
+        background-color: #5dade2 !important;
+        color: white !important;
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     .dataframe tbody tr:hover {
-        background-color: #4d6570 !important;
-        transform: scale(1.01);
-        
-    }
-    
-    /* Inputs - Effet bordure animée */
-    .stSelectbox>div, .stTextInput>div, 
-    .stDateInput>div, .stNumberInput>div {
-        transition: all 0.3s ease;
-    }
-    .stSelectbox>div:hover, .stTextInput>div:hover,
-    .stDateInput>div:hover, .stNumberInput>div:hover {
-        border: 1px solid #5dade2 !important;
-    box-shadow: 0 0 6px rgba(93, 173, 226, 0.4);
-    }
-    
-    /* Onglets - Animation fluide */
-    .stTabs [data-baseweb="tab-list"] button {
-        transition: all 0.3s ease;
-        border-radius: 8px 8px 0 0 !important;
-    }
-    .stTabs [data-baseweb="tab-list"] button:hover {
-        background-color: #8cd7e6 !important;
-    }
-    .stTabs [data-baseweb="tab-list"] button:hover p {
-    color: #1B4F72 !important;
-    transform: scale(1.03);
-    font-weight: 500;
-}
-
-    
-    /* Cartes (colonnes) - Effet de profondeur */
-    .stColumn {
-        transition: all 0.4s ease;
-        border-radius: 12px;
-        padding: 15px;
-    }
-    .stColumn:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
-        background-color: #8cd7e6;
-    }
-    
-    /* Tooltips personnalisés */
-    [data-testid="stTooltip"] {
-        background-color: #2980B9 !important;
-        color: white !important;
-        border-radius: 8px !important;
+        background-color: #f5f5f5;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# En-tête avec logo animé
+# Titre principal
 st.markdown("""
-<div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
-    <h1 style="text-align:center; color: #154360; transition: all 0.3s ease;"> 🏨Gestion de la Chaîne Hôtelière</h1>
+<div style="display: flex; align-items: center; justify-content: center; padding: 10px 0;">
+    <h1 style="color: #154360;">🏨 Gestion de la Chaîne Hôtelière</h1>
 </div>
 """, unsafe_allow_html=True)
 
-# Tabs de navigation avec icônes
+# Onglets
 tabs = st.tabs([
     "📖 Réservations", 
     "👥 Clients", 
@@ -116,7 +57,7 @@ tabs = st.tabs([
     "📅 Ajouter réservation"
 ])
 
-# --- Onglet : Liste des réservations --- #
+# --- Réservations
 with tabs[0]:
     st.subheader("📖 Liste des réservations")
     query = '''
@@ -126,15 +67,14 @@ with tabs[0]:
         ORDER BY r.date_arrivee
     '''
     reservations = pd.read_sql(query, conn)
-    
-    # Ajout d'une barre de recherche
     search_term = st.text_input("🔍 Rechercher une réservation")
     if search_term:
-        reservations = reservations[reservations.astype(str).apply(lambda x: x.str.contains(search_term, case=False)).any(axis=1)]
-    
+        reservations = reservations[
+            reservations.astype(str).apply(lambda x: x.str.contains(search_term, case=False)).any(axis=1)
+        ]
     st.dataframe(reservations)
 
-# --- Onglet : Liste des clients --- #
+# --- Clients
 with tabs[1]:
     st.subheader("👥 Liste des clients")
     query = '''
@@ -143,37 +83,32 @@ with tabs[1]:
         ORDER BY id_client
     '''
     clients = pd.read_sql(query, conn)
-    
-    # Filtres interactifs
     col1, col2 = st.columns(2)
     with col1:
         ville_filter = st.selectbox("Filtrer par ville", ["Toutes"] + sorted(clients['ville'].unique()))
     with col2:
         search_client = st.text_input("🔍 Rechercher un client")
-    
     if ville_filter != "Toutes":
         clients = clients[clients['ville'] == ville_filter]
     if search_client:
-        clients = clients[clients.astype(str).apply(lambda x: x.str.contains(search_client, case=False)).any(axis=1)]
-    
+        clients = clients[
+            clients.astype(str).apply(lambda x: x.str.contains(search_client, case=False)).any(axis=1)
+        ]
     st.dataframe(clients)
 
-# --- Onglet : Chambres disponibles --- #
+# --- Chambres disponibles
 with tabs[2]:
     st.subheader("🛏️ Vérifier la disponibilité des chambres")
-    
     with st.expander("🔎 Options de recherche", expanded=True):
         col1, col2 = st.columns(2)
         with col1:
             date_arrivee = st.date_input("Date d'arrivée", value=date.today())
         with col2:
-            date_depart = st.date_input("Date de départ", value=date.today())
-        
-        type_chambre = st.selectbox("Type de chambre", ["Tous", "Standard", "Deluxe", "Suite"])
-    
-    if st.button("🔍 Vérifier la disponibilité", key="check_availability"):
+            date_depart = st.date_input("Date de départ", value=date.today() + timedelta(days=1))
+        type_chambre = st.selectbox("Type de chambre", ["Tous", "Simple", "Double"])
+    if st.button("🔍 Vérifier la disponibilité"):
         if date_depart <= date_arrivee:
-            st.error("La date de départ doit être postérieure à la date d'arrivée.")
+            st.error("Date de départ invalide.")
         else:
             sql = '''
                 SELECT * FROM Chambre
@@ -183,13 +118,9 @@ with tabs[2]:
                 )
             '''
             params = (date_depart, date_arrivee)
-            
             if type_chambre != "Tous":
-                sql += " AND type = ?"
-                params += (type_chambre,)
-            
-            sql += " ORDER BY numero"
-            
+                sql += " AND id_type = ?"
+                params += (1 if type_chambre == "Simple" else 2,)
             df = pd.read_sql(sql, conn, params=params)
             if df.empty:
                 st.info("Aucune chambre disponible pour cette période.")
@@ -197,10 +128,9 @@ with tabs[2]:
                 st.success(f"{len(df)} chambre(s) disponible(s)")
                 st.dataframe(df)
 
-# --- Onglet : Ajouter un client --- #
+# --- Ajouter client
 with tabs[3]:
-    st.subheader("➕ Ajouter un nouveau client")
-    
+    st.subheader("➕ Ajouter un client")
     with st.form("form_client", clear_on_submit=True):
         col1, col2 = st.columns(2)
         with col1:
@@ -211,16 +141,14 @@ with tabs[3]:
             code_postal = st.text_input("Code postal*")
             email = st.text_input("Email*")
             telephone = st.text_input("Téléphone*")
-        
         submitted = st.form_submit_button("💾 Enregistrer le client")
-        
         if submitted:
             if not all([nom, adresse, ville, code_postal, email, telephone]):
-                st.warning("Veuillez remplir tous les champs obligatoires (*)")
+                st.warning("Veuillez remplir tous les champs obligatoires.")
             elif not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-                st.warning("Veuillez entrer une adresse email valide.")
+                st.warning("Email invalide.")
             elif not telephone.isdigit():
-                st.warning("Le téléphone ne doit contenir que des chiffres.")
+                st.warning("Téléphone invalide.")
             else:
                 try:
                     cursor.execute('''
@@ -228,62 +156,67 @@ with tabs[3]:
                         VALUES (?, ?, ?, ?, ?, ?)
                     ''', (nom, adresse, ville, code_postal, email, telephone))
                     conn.commit()
-                    st.success("✅ Client ajouté avec succès !")
+                    st.success("✅ Client ajouté avec succès.")
                 except sqlite3.Error as e:
-                    st.error(f"Erreur lors de l'ajout du client : {e}")
+                    st.error(f"Erreur : {e}")
 
-# --- Onglet : Ajouter une réservation --- #
+# --- Ajouter réservation
 with tabs[4]:
-    st.subheader("📅 Ajouter une nouvelle réservation")
-    
+    st.subheader("📅 Ajouter une réservation")
     with st.form("form_reservation", clear_on_submit=True):
-        # Récupération des clients pour le selectbox
-        clients_list = pd.read_sql("SELECT id_client, nom_complet FROM Client ORDER BY nom_complet", conn)
-        client_selection = st.selectbox(
-            "Client*",
-            options=clients_list['nom_complet'],
-            format_func=lambda x: f"{x} (ID: {clients_list[clients_list['nom_complet'] == x]['id_client'].values[0]})"
-        )
-        id_client = clients_list[clients_list['nom_complet'] == client_selection]['id_client'].values[0]
-        
-        # Sélection de la chambre avec vérification de disponibilité
-        chambres = pd.read_sql("""
-    SELECT c.id_chambre, c.numero, t.nom_type 
-    FROM Chambre c
-    JOIN TypeChambre t ON c.id_type = t.id_type
-    ORDER BY c.numero
-""", conn)
+        # Sélection du client avec dictionnaire pour une identification claire
+        clients_df = pd.read_sql("SELECT id_client, nom_complet FROM Client ORDER BY nom_complet", conn)
+        if clients_df.empty:
+            st.error("Aucun client trouvé. Veuillez d'abord ajouter un client.")
+            st.stop()
+        clients_options = {
+            f"{row['nom_complet']} (ID: {row['id_client']})": row['id_client']
+            for _, row in clients_df.iterrows()
+        }
+        # Fixation d'un index par défaut pour être sûr d'avoir une valeur non None
+        client_selection = st.selectbox("Client*", list(clients_options.keys()), index=0)
+        id_client = clients_options[client_selection]
 
-        chambre_selection = st.selectbox(
-            "Chambre*",
-            options=chambres['numero'],
-            format_func=lambda x: f"Chambre {x} ({chambres[chambres['numero'] == x]['nom_type'].values[0]})"
+        # Sélection des chambres
+        chambres_df = pd.read_sql("""
+            SELECT c.id_chambre, c.numero, t.nom_type
+            FROM Chambre c
+            JOIN TypeChambre t ON c.id_type = t.id_type
+            ORDER BY c.numero
+        """, conn)
 
-        )
-        chambre_id = chambres[chambres['numero'] == chambre_selection]['id_chambre'].values[0]
-        
+        if chambres_df.empty:
+            st.error("Aucune chambre trouvée.")
+            st.stop()
+        chambres_options = {
+            f"Chambre {row['numero']} ({row['nom_type']})": row['id_chambre']
+            for _, row in chambres_df.iterrows()
+        }
+        # Ici, nous fixons également l'index par défaut pour éviter un résultat None.
+        chambre_selection = st.selectbox("Chambre*", list(chambres_options.keys()), index=0)
+        chambre_id = chambres_options[chambre_selection]
+
         col1, col2 = st.columns(2)
         with col1:
             date_arrivee = st.date_input("Date d'arrivée*", value=date.today())
         with col2:
-            date_depart = st.date_input("Date de départ*", value=date.today() + pd.Timedelta(days=1))
-        
-        submitted = st.form_submit_button("💾 Enregistrer la réservation")
+            date_depart = st.date_input("Date de départ*", value=date.today() + timedelta(days=1))
+
+        submitted = st.form_submit_button("💾 Réserver")
         
         if submitted:
             if date_depart <= date_arrivee:
-                st.error("La date de départ doit être postérieure à la date d'arrivée.")
+                st.error("La date de départ doit être après la date d'arrivée.")
             else:
-                # Vérification de la disponibilité
+                # Vérification des conflits de réservation pour la chambre sélectionnée
                 sql_check = '''
                     SELECT * FROM Reservation
                     WHERE id_chambre = ? AND date_arrivee < ? AND date_depart > ?
                 '''
                 cursor.execute(sql_check, (chambre_id, date_depart, date_arrivee))
                 conflit = cursor.fetchone()
-                
                 if conflit:
-                    st.error("❌ Cette chambre est déjà réservée pour cette période.")
+                    st.error("❌ Cette chambre est déjà réservée pour la période sélectionnée.")
                 else:
                     try:
                         cursor.execute('''
@@ -291,13 +224,16 @@ with tabs[4]:
                             VALUES (?, ?, ?, ?)
                         ''', (date_arrivee, date_depart, id_client, chambre_id))
                         conn.commit()
-                        st.success("✅ Réservation enregistrée avec succès !")
+                        st.success("✅ Réservation enregistrée.")
                     except sqlite3.Error as e:
-                        st.error(f"Erreur lors de l'ajout de la réservation : {e}")
+                        st.error(f"Erreur : {e}")
 
-# Pied de page avec effet hover
+# Pied de page
 st.markdown("""
-<div style="text-align: center; margin-top: 30px; padding: 15px; background-color: #838e96; border-radius: 8px; transition: all 0.3s ease;">
-    <p style="color: #4d5154; transition: all 0.3s ease;">© 2025 Gestion Hôtelière - Tous droits réservés par OUHAMMOU YOUSSEF & AYOUB LAKHLIL</p>
+<div style="text-align: center; margin-top: 40px; padding: 15px; background-color: #f8f9fa; border-radius: 10px;">
+    <p style="color: #6c757d;">© 2025 Projet Gestion Hôtelière - OUHAMMOU YOUSSEF & AYOUB LAKHLIL</p>
 </div>
 """, unsafe_allow_html=True)
+
+
+
