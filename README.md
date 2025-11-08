@@ -1,6 +1,6 @@
 # 🏨 Projet de Gestion Hôtelière - Streamlit
 
-Développé par **Ouhammou Youssef** et **Ayoub Lakhlil** dans le cadre du module **Base de Données** – SMI S4 – FS Semlalia.
+Développé par **Ouhammou Youssef** et **A.Lakhlil** 
 
 ---
 
